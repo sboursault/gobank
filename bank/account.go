@@ -28,6 +28,18 @@ type WithdrawnEvent struct {
 	Amount float32 `json:"amount"`
 }
 
+func leftFold(account Account, stream es.EventStream) Account {
+
+	handlers := map[string]func(es.Aggregate, es.Event) es.Aggregate{
+		"opened":    onOpenedEvent,
+		"deposited": onDepositedEvent,
+		"withdrawn": onWithdrawnEvent}
+
+	return stream.LeftFold(account, handlers).(Account)
+}
+
+// event handlers
+
 func onOpenedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 	account := aggregate.(Account)
 
@@ -56,6 +68,22 @@ func onDepositedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 	return account
 }
 
+func onWithdrawnEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
+	account := aggregate.(Account)
+
+	log("event", event)
+
+	payload := unmarshalWithdrawnEvent(event.Payload)
+
+	account.balance -= payload.Amount
+
+	log("account", account)
+
+	return account
+}
+
+// utils
+
 func unmarshalOpenedEvent(json string) OpenedEvent {
 	target := OpenedEvent{}
 	marshaller.Unmarshal([]byte(json), &target)
@@ -64,6 +92,12 @@ func unmarshalOpenedEvent(json string) OpenedEvent {
 
 func unmarshalDepositedEvent(json string) DepositedEvent {
 	target := DepositedEvent{}
+	marshaller.Unmarshal([]byte(json), &target)
+	return target
+}
+
+func unmarshalWithdrawnEvent(json string) WithdrawnEvent {
+	target := WithdrawnEvent{}
 	marshaller.Unmarshal([]byte(json), &target)
 	return target
 }

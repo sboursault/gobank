@@ -28,9 +28,9 @@ func Test_ReadAggregateFromStream2(t *testing.T) {
 	// https://tour.golang.org/methods/15
 	//var i interface{} = "hello"
 
-	stream := EventStream{[]Event{
+	stream := NewEventStream(
 		NewEvent("counter", "counter:001", "incr", `5`),
-		NewEvent("counter", "counter:001", "decr", `3`)}}
+		NewEvent("counter", "counter:001", "decr", `3`))
 
 	handlers := map[string]func(Aggregate, Event) Aggregate{
 		"incr": incr,

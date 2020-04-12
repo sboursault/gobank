@@ -1,7 +1,7 @@
 package eventsourcing
 
 type EventStream struct {
-	events []Event
+	Events []Event
 }
 
 /*
@@ -15,9 +15,13 @@ func (stream *EventStream) LeftFold(
 
 	aggregate := init
 
-	for _, event := range stream.events {
+	for _, event := range stream.Events {
 		f := handlers[event.EventType]
 		aggregate = f(aggregate, event)
 	}
 	return aggregate
+}
+
+func NewEventStream(events ...Event) EventStream {
+	return EventStream{events}
 }
