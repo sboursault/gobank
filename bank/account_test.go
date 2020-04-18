@@ -68,7 +68,30 @@ func Test_LeftFold(t *testing.T) {
 	}
 }
 
+func Test_LeftFold_withEventStore(t *testing.T) {
+
+	eventStore := es.InMemoryStore{}
+
+	eventStore.Write(es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`))
+	eventStore.Write(es.NewEvent("account", "account:00001", "deposited", `{"amount":100}`))
+	eventStore.Write(es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`))
+
+	stream := eventStore.Read("account:00001")
+
+	got := leftFold(Account{}, stream)
+
+	want := Account{"Snow John", 70}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
+	}
+}
+
 // TODO
+// how to switch memory store
+//   soit c'est account qui masque la base
+//   soit c'est un objet banque/service qui permet de récupérer un compte, faire un dépot
+//      -> essayer cette option, dans le dernier test, ne plus faire apparaître l'event store
 // verif balance positive
 // blagues : John Snow ouvre un compte en banque, verif balance un peu bête car empeche les agio
 // brancher sur base PG

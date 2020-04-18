@@ -1,5 +1,6 @@
 package eventsourcing
 
 type EventStore interface {
-	Read(streamId string) (events []Event)
+	Write(event Event)
+	Read(streamId string) (stream EventStream)
 }
