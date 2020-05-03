@@ -13,7 +13,7 @@ func Test_OpenedEvent(t *testing.T) {
 
 	got := onOpenedEvent(Account{}, openedEvent)
 
-	want := Account{"Snow John", 0}
+	want := Account{owner: "Snow John", balance: 0}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -28,7 +28,7 @@ func Test_DepositedEvent(t *testing.T) {
 	aggregate := onOpenedEvent(Account{}, openedEvent)
 	got := onDepositedEvent(aggregate, depositedEvent)
 
-	want := Account{"Snow John", 100}
+	want := Account{owner: "Snow John", balance: 100}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -45,7 +45,24 @@ func Test_WithdrawnEvent(t *testing.T) {
 	aggregate = onDepositedEvent(aggregate, depositedEvent)
 	got := onWithdrawnEvent(aggregate, withdrawnEvent)
 
-	want := Account{"Snow John", 70}
+	want := Account{owner: "Snow John", balance: 70}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
+	}
+} // TODO: should be rejected if amount is higher than balance
+
+func Test_ClosedEvent(t *testing.T) {
+
+	openedEvent := es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`)
+	closedEvent := es.NewEvent("account", "account:00001", "closed", `{}`)
+
+	aggregate := onOpenedEvent(Account{}, openedEvent)
+	got := onClosedEvent(aggregate, closedEvent)
+
+	// TODO https://golangbot.com/go-packages/
+
+	want := Account{owner: "Snow John", closed: true}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -57,30 +74,12 @@ func Test_LeftFold(t *testing.T) {
 	stream := es.NewEventStream(
 		es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`),
 		es.NewEvent("account", "account:00001", "deposited", `{"amount":100}`),
-		es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`))
+		es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`),
+		es.NewEvent("account", "account:00001", "closed", `{}`))
 
-	got := leftFold(Account{}, stream)
+	got := leftFold(stream)
 
-	want := Account{"Snow John", 70}
-
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
-	}
-}
-
-func Test_LeftFold_withEventStore(t *testing.T) {
-
-	eventStore := es.InMemoryStore{}
-
-	eventStore.Write(es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`))
-	eventStore.Write(es.NewEvent("account", "account:00001", "deposited", `{"amount":100}`))
-	eventStore.Write(es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`))
-
-	stream := eventStore.Read("account:00001")
-
-	got := leftFold(Account{}, stream)
-
-	want := Account{"Snow John", 70}
+	want := Account{owner: "Snow John", balance: 70, closed: true}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)

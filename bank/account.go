@@ -10,6 +10,7 @@ import (
 type Account struct {
 	owner   string
 	balance float32
+	closed  bool
 }
 
 // account events
@@ -28,14 +29,18 @@ type WithdrawnEvent struct {
 	Amount float32 `json:"amount"`
 }
 
-func leftFold(account Account, stream es.EventStream) Account {
+type ClosedEvent struct {
+}
+
+func leftFold(stream es.EventStream) Account {
 
 	handlers := map[string]func(es.Aggregate, es.Event) es.Aggregate{
 		"opened":    onOpenedEvent,
 		"deposited": onDepositedEvent,
-		"withdrawn": onWithdrawnEvent}
+		"withdrawn": onWithdrawnEvent,
+		"closed":    onClosedEvent}
 
-	return stream.LeftFold(account, handlers).(Account)
+	return stream.LeftFold(Account{}, handlers).(Account)
 }
 
 // event handlers
@@ -76,6 +81,18 @@ func onWithdrawnEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 	payload := unmarshalWithdrawnEvent(event.Payload)
 
 	account.balance -= payload.Amount
+
+	log("account", account)
+
+	return account
+}
+
+func onClosedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
+	account := aggregate.(Account)
+
+	log("event", event)
+
+	account.closed = true
 
 	log("account", account)
 
