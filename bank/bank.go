@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/lithammer/shortuuid"
 
 	"encoding/json"
@@ -50,22 +52,35 @@ func openAccount(owner string) string {
 func deposit(accountId string, amount float32) {
 
 	event, _ := json.Marshal(DepositedEvent{amount})
-
 	eventStore.Write(es.NewEvent("account", accountId, "deposited", string(event)))
 }
 
-func withdraw(accountId string, amount float32) {
+func withdraw(accountId string, amount float32) error {
+
+	account := getAccount(accountId)
+
+	if amount > account.balance {
+		return fmt.Errorf("Not enough money to withdraw %g (account balance: %g)", amount, account.balance)
+	}
 
 	event, _ := json.Marshal(WithdrawnEvent{amount})
-
 	eventStore.Write(es.NewEvent("account", accountId, "withdrawn", string(event)))
+
+	return nil
 }
 
-func closeAccount(accountId string) {
+func closeAccount(accountId string) error {
+
+	account := getAccount(accountId)
+
+	if account.balance != 0 {
+		return fmt.Errorf("Can't close account (account balance: %g)", account.balance)
+	}
 
 	event, _ := json.Marshal(ClosedEvent{})
-
 	eventStore.Write(es.NewEvent("account", accountId, "closed", string(event)))
+
+	return nil
 }
 
 func getAccount(id string) Account {
