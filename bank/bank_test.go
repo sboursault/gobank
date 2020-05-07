@@ -1,9 +1,11 @@
-package main // TODO rename bank
+package bank
 
 import (
 	"errors"
 	"reflect"
 	"testing"
+
+	"github.com/sboursault/gobank/bank/account"
 )
 
 func Test_openAccount(t *testing.T) {
@@ -12,7 +14,7 @@ func Test_openAccount(t *testing.T) {
 
 	got := getAccount(id)
 
-	want := Account{owner: "John Snow", balance: 0}
+	want := account.Account{Owner: "John Snow", Balance: 0}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -27,7 +29,7 @@ func Test_deposit(t *testing.T) {
 
 	got := getAccount(accountId)
 
-	want := Account{owner: "John Snow", balance: 200}
+	want := account.Account{Owner: "John Snow", Balance: 200}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -43,7 +45,7 @@ func Test_withraw(t *testing.T) {
 
 	got := getAccount(accountId)
 
-	want := Account{owner: "John Snow", balance: 150}
+	want := account.Account{Owner: "John Snow", Balance: 150}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -65,7 +67,7 @@ func Test_withraw_refused(t *testing.T) {
 
 	got := getAccount(accountId)
 
-	want := Account{owner: "John Snow", balance: 0}
+	want := account.Account{Owner: "John Snow", Balance: 0}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -80,7 +82,7 @@ func Test_close(t *testing.T) {
 
 	got := getAccount(accountId)
 
-	want := Account{owner: "John Snow", balance: 0, closed: true}
+	want := account.Account{Owner: "John Snow", Balance: 0, Closed: true}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -103,7 +105,7 @@ func Test_close_refused(t *testing.T) {
 
 	got := getAccount(accountId)
 
-	want := Account{owner: "John Snow", balance: 200, closed: false}
+	want := account.Account{Owner: "John Snow", Balance: 200, Closed: false}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)

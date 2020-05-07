@@ -1,4 +1,4 @@
-package main
+package bank
 
 import (
 	"fmt"
@@ -7,40 +7,16 @@ import (
 
 	"encoding/json"
 
+	"github.com/sboursault/gobank/bank/account"
 	es "github.com/sboursault/gobank/eventsourcing"
 )
 
 var eventStore = es.NewInMemory()
 
-/*
-
-interface to open / deposit / withdrow / close an account
-
-
-
-eventStore := es.InMemoryStore{}
-
-	eventStore.Write(es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`))
-	eventStore.Write(es.NewEvent("account", "account:00001", "deposited", `{"amount":100}`))
-	eventStore.Write(es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`))
-
-	stream := eventStore.Read("account:00001")
-
-	got := leftFold(Account{}, stream)
-
-	want := Account{"Snow John", 70}
-
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
-	}
-
-
-*/
-
 func openAccount(owner string) string {
 	accountId := shortuuid.New()
 
-	event, _ := json.Marshal(OpenedEvent{owner}) // tester sortir account.go dans un bank/account/account.go -> la syntaxe est-elle plus sympa ?
+	event, _ := json.Marshal(account.NewOpenedEvent(owner))
 
 	eventStore.Write(es.NewEvent("account", accountId, "opened", string(event))) // un peu moche es.NewEvent, events.New ? masquer Event ?
 
@@ -51,19 +27,19 @@ func openAccount(owner string) string {
 
 func deposit(accountId string, amount float32) {
 
-	event, _ := json.Marshal(DepositedEvent{amount})
+	event, _ := json.Marshal(account.NewDepositedEvent(amount))
 	eventStore.Write(es.NewEvent("account", accountId, "deposited", string(event)))
 }
 
 func withdraw(accountId string, amount float32) error {
 
-	account := getAccount(accountId)
+	aggregate := getAccount(accountId)
 
-	if amount > account.balance {
-		return fmt.Errorf("Not enough money to withdraw %g (account balance: %g)", amount, account.balance)
+	if amount > aggregate.Balance {
+		return fmt.Errorf("Not enough money to withdraw %g (account balance: %g)", amount, aggregate.Balance)
 	}
 
-	event, _ := json.Marshal(WithdrawnEvent{amount})
+	event, _ := json.Marshal(account.NewWithdrawnEvent(amount))
 	eventStore.Write(es.NewEvent("account", accountId, "withdrawn", string(event)))
 
 	return nil
@@ -71,23 +47,23 @@ func withdraw(accountId string, amount float32) error {
 
 func closeAccount(accountId string) error {
 
-	account := getAccount(accountId)
+	aggregate := getAccount(accountId)
 
-	if account.balance != 0 {
-		return fmt.Errorf("Can't close account (account balance: %g)", account.balance)
+	if aggregate.Balance != 0 {
+		return fmt.Errorf("Can't close account (account balance: %g)", aggregate.Balance)
 	}
 
-	event, _ := json.Marshal(ClosedEvent{})
+	event, _ := json.Marshal(account.NewClosedEvent())
 	eventStore.Write(es.NewEvent("account", accountId, "closed", string(event)))
 
 	return nil
 }
 
-func getAccount(id string) Account {
+func getAccount(id string) account.Account {
 
 	stream := eventStore.Read(id)
 
-	return leftFold(stream)
+	return account.LeftFold(stream)
 
 }
 

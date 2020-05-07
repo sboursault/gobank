@@ -1,4 +1,4 @@
-package main // TODO rename bank
+package account
 
 import (
 	"reflect"
@@ -13,7 +13,7 @@ func Test_OpenedEvent(t *testing.T) {
 
 	got := onOpenedEvent(Account{}, openedEvent)
 
-	want := Account{owner: "Snow John", balance: 0}
+	want := Account{Owner: "Snow John", Balance: 0}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -28,7 +28,7 @@ func Test_DepositedEvent(t *testing.T) {
 	aggregate := onOpenedEvent(Account{}, openedEvent)
 	got := onDepositedEvent(aggregate, depositedEvent)
 
-	want := Account{owner: "Snow John", balance: 100}
+	want := Account{Owner: "Snow John", Balance: 100}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -45,12 +45,12 @@ func Test_WithdrawnEvent(t *testing.T) {
 	aggregate = onDepositedEvent(aggregate, depositedEvent)
 	got := onWithdrawnEvent(aggregate, withdrawnEvent)
 
-	want := Account{owner: "Snow John", balance: 70}
+	want := Account{Owner: "Snow John", Balance: 70}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
 	}
-} // TODO: should be rejected if amount is higher than balance
+}
 
 func Test_ClosedEvent(t *testing.T) {
 
@@ -60,9 +60,7 @@ func Test_ClosedEvent(t *testing.T) {
 	aggregate := onOpenedEvent(Account{}, openedEvent)
 	got := onClosedEvent(aggregate, closedEvent)
 
-	// TODO https://golangbot.com/go-packages/
-
-	want := Account{owner: "Snow John", closed: true}
+	want := Account{Owner: "Snow John", Closed: true}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -77,9 +75,9 @@ func Test_LeftFold(t *testing.T) {
 		es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`),
 		es.NewEvent("account", "account:00001", "closed", `{}`))
 
-	got := leftFold(stream)
+	got := LeftFold(stream)
 
-	want := Account{owner: "Snow John", balance: 70, closed: true}
+	want := Account{Owner: "Snow John", Balance: 70, Closed: true}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)

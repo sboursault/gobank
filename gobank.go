@@ -8,12 +8,6 @@ Usage:
 */
 package main // executable commands must always use package main.
 
-import (
-	"fmt"
-
-	"github.com/google/go-cmp/cmp"
-)
-
-func main() {
+/*func main() {
 	fmt.Println(cmp.Diff("Hello World", "Hello Go"))
-}
+}*/

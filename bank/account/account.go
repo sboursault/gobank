@@ -1,4 +1,4 @@
-package main
+package account
 
 import (
 	marshaller "encoding/json"
@@ -8,9 +8,9 @@ import (
 )
 
 type Account struct {
-	owner   string
-	balance float32
-	closed  bool
+	Owner   string
+	Balance float32
+	Closed  bool
 }
 
 // account events
@@ -32,7 +32,7 @@ type WithdrawnEvent struct {
 type ClosedEvent struct {
 }
 
-func leftFold(stream es.EventStream) Account {
+func LeftFold(stream es.EventStream) Account {
 
 	handlers := map[string]func(es.Aggregate, es.Event) es.Aggregate{
 		"opened":    onOpenedEvent,
@@ -52,7 +52,7 @@ func onOpenedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 
 	payload := unmarshalOpenedEvent(event.Payload)
 
-	account.owner = payload.Owner
+	account.Owner = payload.Owner
 
 	log("account", account)
 
@@ -66,7 +66,7 @@ func onDepositedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 
 	payload := unmarshalDepositedEvent(event.Payload)
 
-	account.balance += payload.Amount
+	account.Balance += payload.Amount
 
 	log("account", account)
 
@@ -80,7 +80,7 @@ func onWithdrawnEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 
 	payload := unmarshalWithdrawnEvent(event.Payload)
 
-	account.balance -= payload.Amount
+	account.Balance -= payload.Amount
 
 	log("account", account)
 
@@ -92,7 +92,7 @@ func onClosedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 
 	log("event", event)
 
-	account.closed = true
+	account.Closed = true
 
 	log("account", account)
 
@@ -123,4 +123,22 @@ func log(label string, something interface{}) {
 	if debug {
 		fmt.Printf(label+": %+v\n", something)
 	}
+}
+
+// creators
+
+func NewOpenedEvent(owner string) OpenedEvent {
+	return OpenedEvent{owner}
+}
+
+func NewDepositedEvent(amount float32) DepositedEvent {
+	return DepositedEvent{amount}
+}
+
+func NewWithdrawnEvent(amount float32) WithdrawnEvent {
+	return WithdrawnEvent{amount}
+}
+
+func NewClosedEvent() ClosedEvent {
+	return ClosedEvent{}
 }
