@@ -1,4 +1,4 @@
-package eventsourcing
+package events
 
 type Event struct {
 	AggregateType string
@@ -7,7 +7,7 @@ type Event struct {
 	Payload       string
 }
 
-func NewEvent(
+func New(
 	aggregateType string,
 	streamId string,
 	eventType string,

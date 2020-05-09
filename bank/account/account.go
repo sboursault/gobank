@@ -4,7 +4,7 @@ import (
 	marshaller "encoding/json"
 	"fmt"
 
-	es "github.com/sboursault/gobank/eventsourcing"
+	"github.com/sboursault/gobank/events"
 )
 
 const debug = true
@@ -34,9 +34,9 @@ type closedEvent struct {
 
 // functions
 
-func LeftFold(stream es.EventStream) Account {
+func LeftFold(stream events.Stream) Account {
 
-	handlers := map[string]func(es.Aggregate, es.Event) es.Aggregate{
+	handlers := map[string]func(events.Aggregate, events.Event) events.Aggregate{
 		"opened":    onOpenedEvent,
 		"deposited": onDepositedEvent,
 		"withdrawn": onWithdrawnEvent,
@@ -65,7 +65,7 @@ func NewClosedEvent() closedEvent {
 
 // event handlers
 
-func onOpenedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
+func onOpenedEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)
@@ -79,7 +79,7 @@ func onOpenedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 	return account
 }
 
-func onDepositedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
+func onDepositedEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)
@@ -93,7 +93,7 @@ func onDepositedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 	return account
 }
 
-func onWithdrawnEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
+func onWithdrawnEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)
@@ -107,7 +107,7 @@ func onWithdrawnEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 	return account
 }
 
-func onClosedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
+func onClosedEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)

@@ -8,17 +8,18 @@ import (
 	"encoding/json"
 
 	"github.com/sboursault/gobank/bank/account"
-	es "github.com/sboursault/gobank/eventsourcing"
+	"github.com/sboursault/gobank/events"
+	"github.com/sboursault/gobank/events/store"
 )
 
-var eventStore = es.NewInMemory()
+var eventStore = store.NewInMemory()
 
 func openAccount(owner string) string {
 	accountId := shortuuid.New()
 
 	event, _ := json.Marshal(account.NewOpenedEvent(owner))
 
-	eventStore.Write(es.NewEvent("account", accountId, "opened", string(event))) // un peu moche es.NewEvent, events.New ? masquer Event ?
+	eventStore.Write(events.New("account", accountId, "opened", string(event))) // un peu moche events.New, events.New ? masquer Event ?
 
 	// see https://golangbot.com/go-packages/
 
@@ -28,7 +29,7 @@ func openAccount(owner string) string {
 func deposit(accountId string, amount float32) {
 
 	event, _ := json.Marshal(account.NewDepositedEvent(amount))
-	eventStore.Write(es.NewEvent("account", accountId, "deposited", string(event)))
+	eventStore.Write(events.New("account", accountId, "deposited", string(event)))
 }
 
 func withdraw(accountId string, amount float32) error {
@@ -40,7 +41,7 @@ func withdraw(accountId string, amount float32) error {
 	}
 
 	event, _ := json.Marshal(account.NewWithdrawnEvent(amount))
-	eventStore.Write(es.NewEvent("account", accountId, "withdrawn", string(event)))
+	eventStore.Write(events.New("account", accountId, "withdrawn", string(event)))
 
 	return nil
 }
@@ -54,7 +55,7 @@ func closeAccount(accountId string) error {
 	}
 
 	event, _ := json.Marshal(account.NewClosedEvent())
-	eventStore.Write(es.NewEvent("account", accountId, "closed", string(event)))
+	eventStore.Write(events.New("account", accountId, "closed", string(event)))
 
 	return nil
 }

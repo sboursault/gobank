@@ -1,4 +1,4 @@
-package eventsourcing
+package events
 
 import (
 	"strconv"
@@ -28,9 +28,9 @@ func Test_ReadAggregateFromStream2(t *testing.T) {
 	// https://tour.golang.org/methods/15
 	//var i interface{} = "hello"
 
-	stream := NewEventStream(
-		NewEvent("counter", "counter:001", "incr", `5`),
-		NewEvent("counter", "counter:001", "decr", `3`))
+	stream := NewStream(
+		New("counter", "counter:001", "incr", `5`),
+		New("counter", "counter:001", "decr", `3`))
 
 	handlers := map[string]func(Aggregate, Event) Aggregate{
 		"incr": incr,

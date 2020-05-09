@@ -1,6 +1,6 @@
-package eventsourcing
+package events
 
-type EventStream struct {
+type Stream struct {
 	Events []Event
 }
 
@@ -9,7 +9,7 @@ rehydrate / replay / left fold
 */
 //func (stream *Stream) Replay(handlers map[string]Handler) Aggregate {
 
-func (stream *EventStream) LeftFold(
+func (stream *Stream) LeftFold(
 	init Aggregate,
 	handlers map[string]func(Aggregate, Event) Aggregate) Aggregate {
 
@@ -22,6 +22,6 @@ func (stream *EventStream) LeftFold(
 	return aggregate
 }
 
-func NewEventStream(events ...Event) EventStream {
-	return EventStream{events}
+func NewStream(events ...Event) Stream {
+	return Stream{events}
 }
