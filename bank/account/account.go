@@ -7,30 +7,32 @@ import (
 	es "github.com/sboursault/gobank/eventsourcing"
 )
 
+const debug = true
+
+// types
+
 type Account struct {
 	Owner   string
 	Balance float32
 	Closed  bool
 }
 
-// account events
-
-const debug = true
-
-type OpenedEvent struct {
+type openedEvent struct {
 	Owner string `json:"owner"`
 }
 
-type DepositedEvent struct {
+type depositedEvent struct {
 	Amount float32 `json:"amount"`
 }
 
-type WithdrawnEvent struct {
+type withdrawnEvent struct {
 	Amount float32 `json:"amount"`
 }
 
-type ClosedEvent struct {
+type closedEvent struct {
 }
+
+// functions
 
 func LeftFold(stream es.EventStream) Account {
 
@@ -41,6 +43,24 @@ func LeftFold(stream es.EventStream) Account {
 		"closed":    onClosedEvent}
 
 	return stream.LeftFold(Account{}, handlers).(Account)
+}
+
+// creators
+
+func NewOpenedEvent(owner string) openedEvent {
+	return openedEvent{owner}
+}
+
+func NewDepositedEvent(amount float32) depositedEvent {
+	return depositedEvent{amount}
+}
+
+func NewWithdrawnEvent(amount float32) withdrawnEvent {
+	return withdrawnEvent{amount}
+}
+
+func NewClosedEvent() closedEvent {
+	return closedEvent{}
 }
 
 // event handlers
@@ -101,20 +121,20 @@ func onClosedEvent(aggregate es.Aggregate, event es.Event) es.Aggregate {
 
 // utils
 
-func unmarshalOpenedEvent(json string) OpenedEvent {
-	target := OpenedEvent{}
+func unmarshalOpenedEvent(json string) openedEvent {
+	target := openedEvent{}
 	marshaller.Unmarshal([]byte(json), &target)
 	return target
 }
 
-func unmarshalDepositedEvent(json string) DepositedEvent {
-	target := DepositedEvent{}
+func unmarshalDepositedEvent(json string) depositedEvent {
+	target := depositedEvent{}
 	marshaller.Unmarshal([]byte(json), &target)
 	return target
 }
 
-func unmarshalWithdrawnEvent(json string) WithdrawnEvent {
-	target := WithdrawnEvent{}
+func unmarshalWithdrawnEvent(json string) withdrawnEvent {
+	target := withdrawnEvent{}
 	marshaller.Unmarshal([]byte(json), &target)
 	return target
 }
@@ -123,22 +143,4 @@ func log(label string, something interface{}) {
 	if debug {
 		fmt.Printf(label+": %+v\n", something)
 	}
-}
-
-// creators
-
-func NewOpenedEvent(owner string) OpenedEvent {
-	return OpenedEvent{owner}
-}
-
-func NewDepositedEvent(amount float32) DepositedEvent {
-	return DepositedEvent{amount}
-}
-
-func NewWithdrawnEvent(amount float32) WithdrawnEvent {
-	return WithdrawnEvent{amount}
-}
-
-func NewClosedEvent() ClosedEvent {
-	return ClosedEvent{}
 }

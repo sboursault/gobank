@@ -64,7 +64,6 @@ func getAccount(id string) account.Account {
 	stream := eventStore.Read(id)
 
 	return account.LeftFold(stream)
-
 }
 
 func PrintAccountInfo(id string) {
