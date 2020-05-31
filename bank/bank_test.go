@@ -5,16 +5,17 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sboursault/gobank/bank/account"
+	"github.com/sboursault/gobank/bank/accounts"
 )
 
 func Test_openAccount(t *testing.T) {
 
 	id := openAccount("John Snow")
 
-	got := getAccount(id)
+	got := accounts.Get(eventStore, id)
 
-	want := account.Account{Owner: "John Snow", Balance: 0}
+	want := accounts.New()
+	want.Owner = "John Snow"
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -27,9 +28,11 @@ func Test_deposit(t *testing.T) {
 
 	deposit(accountId, 200)
 
-	got := getAccount(accountId)
+	got := accounts.Get(eventStore, accountId)
 
-	want := account.Account{Owner: "John Snow", Balance: 200}
+	want := accounts.New()
+	want.Owner = "John Snow"
+	want.Balance = 200
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -43,9 +46,11 @@ func Test_withraw(t *testing.T) {
 	deposit(accountId, 200)
 	withdraw(accountId, 50)
 
-	got := getAccount(accountId)
+	got := accounts.Get(eventStore, accountId)
 
-	want := account.Account{Owner: "John Snow", Balance: 150}
+	want := accounts.New()
+	want.Owner = "John Snow"
+	want.Balance = 150
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -65,9 +70,11 @@ func Test_withraw_refused(t *testing.T) {
 		return
 	}
 
-	got := getAccount(accountId)
+	got := accounts.Get(eventStore, accountId)
 
-	want := account.Account{Owner: "John Snow", Balance: 0}
+	want := accounts.New()
+	want.Owner = "John Snow"
+	want.Balance = 0
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -80,9 +87,12 @@ func Test_close(t *testing.T) {
 
 	closeAccount(accountId)
 
-	got := getAccount(accountId)
+	got := accounts.Get(eventStore, accountId)
 
-	want := account.Account{Owner: "John Snow", Balance: 0, Closed: true}
+	want := accounts.New()
+	want.Owner = "John Snow"
+	want.Balance = 0
+	want.Closed = true
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -103,9 +113,12 @@ func Test_close_refused(t *testing.T) {
 		return
 	}
 
-	got := getAccount(accountId)
+	got := accounts.Get(eventStore, accountId)
 
-	want := account.Account{Owner: "John Snow", Balance: 200, Closed: false}
+	want := accounts.New()
+	want.Owner = "John Snow"
+	want.Balance = 200
+	want.Closed = false
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)

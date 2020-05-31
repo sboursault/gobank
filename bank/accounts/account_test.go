@@ -1,4 +1,4 @@
-package account
+package accounts
 
 import (
 	"reflect"
@@ -11,9 +11,9 @@ func Test_OpenedEvent(t *testing.T) {
 
 	openedEvent := events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`)
 
-	got := onOpenedEvent(Account{}, openedEvent)
+	got := onOpenedEvent(account{}, openedEvent)
 
-	want := Account{Owner: "Snow John", Balance: 0}
+	want := account{Owner: "Snow John", Balance: 0}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -25,10 +25,10 @@ func Test_DepositedEvent(t *testing.T) {
 	openedEvent := events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`)
 	depositedEvent := events.New("account", "account:00001", "deposited", `{"amount":100}`)
 
-	aggregate := onOpenedEvent(Account{}, openedEvent)
+	aggregate := onOpenedEvent(account{}, openedEvent)
 	got := onDepositedEvent(aggregate, depositedEvent)
 
-	want := Account{Owner: "Snow John", Balance: 100}
+	want := account{Owner: "Snow John", Balance: 100}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -41,11 +41,11 @@ func Test_WithdrawnEvent(t *testing.T) {
 	depositedEvent := events.New("account", "account:00001", "deposited", `{"amount":100}`)
 	withdrawnEvent := events.New("account", "account:00001", "withdrawn", `{"amount":30}`)
 
-	aggregate := onOpenedEvent(Account{}, openedEvent)
+	aggregate := onOpenedEvent(account{}, openedEvent)
 	aggregate = onDepositedEvent(aggregate, depositedEvent)
 	got := onWithdrawnEvent(aggregate, withdrawnEvent)
 
-	want := Account{Owner: "Snow John", Balance: 70}
+	want := account{Owner: "Snow John", Balance: 70}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -57,10 +57,10 @@ func Test_ClosedEvent(t *testing.T) {
 	openedEvent := events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`)
 	closedEvent := events.New("account", "account:00001", "closed", `{}`)
 
-	aggregate := onOpenedEvent(Account{}, openedEvent)
+	aggregate := onOpenedEvent(account{}, openedEvent)
 	got := onClosedEvent(aggregate, closedEvent)
 
-	want := Account{Owner: "Snow John", Closed: true}
+	want := account{Owner: "Snow John", Closed: true}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
@@ -77,7 +77,7 @@ func Test_LeftFold(t *testing.T) {
 
 	got := LeftFold(stream)
 
-	want := Account{Owner: "Snow John", Balance: 70, Closed: true}
+	want := account{Owner: "Snow John", Balance: 70, Closed: true}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)

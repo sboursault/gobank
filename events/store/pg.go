@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq" // pg driver, needs to be imported even if not explicitly used
+	"github.com/sboursault/gobank/events"
 )
 
 const (
@@ -13,18 +14,21 @@ const (
 	DB_NAME     = "postgres"
 )
 
+// types
+
+type Stream = events.Stream
+type Event = events.Event
+type Aggregate = events.Aggregate
+
 func connect() *sql.DB {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		DB_USER, DB_PASSWORD, DB_NAME)
 	db, err := sql.Open("postgres", dbinfo)
 	checkErr(err)
-	//
 	return db
 }
 
-func insert() {
-	fmt.Println("# Inserting values")
-
+func insert(e Event) {
 	db := connect()
 
 	var lastInsertId int

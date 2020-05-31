@@ -1,4 +1,4 @@
-package account
+package accounts
 
 import (
 	marshaller "encoding/json"
@@ -14,8 +14,9 @@ const debug = true
 type Stream = events.Stream
 type Event = events.Event
 type Aggregate = events.Aggregate
+type EventStore = events.EventStore
 
-type Account struct {
+type account struct {
 	Owner   string
 	Balance float32
 	Closed  bool
@@ -36,9 +37,9 @@ type withdrawnEvent struct {
 type closedEvent struct {
 }
 
-// functions
+// public functions
 
-func LeftFold(stream Stream) Account {
+func LeftFold(stream Stream) account {
 
 	handlers := map[string]func(Aggregate, Event) Aggregate{
 		"opened":    onOpenedEvent,
@@ -46,10 +47,19 @@ func LeftFold(stream Stream) Account {
 		"withdrawn": onWithdrawnEvent,
 		"closed":    onClosedEvent}
 
-	return stream.LeftFold(Account{}, handlers).(Account)
+	return stream.LeftFold(account{}, handlers).(account)
+}
+
+func Get(eventStore EventStore, id string) account {
+	stream := eventStore.Read(id)
+	return LeftFold(stream)
 }
 
 // creators
+
+func New() account {
+	return account{}
+}
 
 func NewOpenedEvent(owner string) openedEvent {
 	return openedEvent{owner}
@@ -70,7 +80,7 @@ func NewClosedEvent() closedEvent {
 // event handlers
 
 func onOpenedEvent(aggregate Aggregate, event Event) Aggregate {
-	account := aggregate.(Account)
+	account := aggregate.(account)
 
 	log("event", event)
 
@@ -84,7 +94,7 @@ func onOpenedEvent(aggregate Aggregate, event Event) Aggregate {
 }
 
 func onDepositedEvent(aggregate Aggregate, event Event) Aggregate {
-	account := aggregate.(Account)
+	account := aggregate.(account)
 
 	log("event", event)
 
@@ -98,7 +108,7 @@ func onDepositedEvent(aggregate Aggregate, event Event) Aggregate {
 }
 
 func onWithdrawnEvent(aggregate Aggregate, event Event) Aggregate {
-	account := aggregate.(Account)
+	account := aggregate.(account)
 
 	log("event", event)
 
@@ -112,7 +122,7 @@ func onWithdrawnEvent(aggregate Aggregate, event Event) Aggregate {
 }
 
 func onClosedEvent(aggregate Aggregate, event Event) Aggregate {
-	account := aggregate.(Account)
+	account := aggregate.(account)
 
 	log("event", event)
 
