@@ -1,3 +1,3 @@
-package events
+package eventsourcing
 
 type Aggregate interface{}

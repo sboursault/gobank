@@ -1,4 +1,4 @@
-package events
+package eventsourcing
 
 type Stream struct {
 	Events []Event

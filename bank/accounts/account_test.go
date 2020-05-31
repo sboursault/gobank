@@ -4,12 +4,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sboursault/gobank/events"
+	es "github.com/sboursault/gobank/eventsourcing"
 )
 
 func Test_OpenedEvent(t *testing.T) {
 
-	openedEvent := events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`)
+	openedEvent := es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`)
 
 	got := onOpenedEvent(account{}, openedEvent)
 
@@ -22,8 +22,8 @@ func Test_OpenedEvent(t *testing.T) {
 
 func Test_DepositedEvent(t *testing.T) {
 
-	openedEvent := events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`)
-	depositedEvent := events.New("account", "account:00001", "deposited", `{"amount":100}`)
+	openedEvent := es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`)
+	depositedEvent := es.NewEvent("account", "account:00001", "deposited", `{"amount":100}`)
 
 	aggregate := onOpenedEvent(account{}, openedEvent)
 	got := onDepositedEvent(aggregate, depositedEvent)
@@ -37,9 +37,9 @@ func Test_DepositedEvent(t *testing.T) {
 
 func Test_WithdrawnEvent(t *testing.T) {
 
-	openedEvent := events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`)
-	depositedEvent := events.New("account", "account:00001", "deposited", `{"amount":100}`)
-	withdrawnEvent := events.New("account", "account:00001", "withdrawn", `{"amount":30}`)
+	openedEvent := es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`)
+	depositedEvent := es.NewEvent("account", "account:00001", "deposited", `{"amount":100}`)
+	withdrawnEvent := es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`)
 
 	aggregate := onOpenedEvent(account{}, openedEvent)
 	aggregate = onDepositedEvent(aggregate, depositedEvent)
@@ -54,8 +54,8 @@ func Test_WithdrawnEvent(t *testing.T) {
 
 func Test_ClosedEvent(t *testing.T) {
 
-	openedEvent := events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`)
-	closedEvent := events.New("account", "account:00001", "closed", `{}`)
+	openedEvent := es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`)
+	closedEvent := es.NewEvent("account", "account:00001", "closed", `{}`)
 
 	aggregate := onOpenedEvent(account{}, openedEvent)
 	got := onClosedEvent(aggregate, closedEvent)
@@ -69,11 +69,11 @@ func Test_ClosedEvent(t *testing.T) {
 
 func Test_LeftFold(t *testing.T) {
 
-	stream := events.NewStream(
-		events.New("account", "account:00001", "opened", `{"owner":"Snow John"}`),
-		events.New("account", "account:00001", "deposited", `{"amount":100}`),
-		events.New("account", "account:00001", "withdrawn", `{"amount":30}`),
-		events.New("account", "account:00001", "closed", `{}`))
+	stream := es.NewStream(
+		es.NewEvent("account", "account:00001", "opened", `{"owner":"Snow John"}`),
+		es.NewEvent("account", "account:00001", "deposited", `{"amount":100}`),
+		es.NewEvent("account", "account:00001", "withdrawn", `{"amount":30}`),
+		es.NewEvent("account", "account:00001", "closed", `{}`))
 
 	got := LeftFold(stream)
 

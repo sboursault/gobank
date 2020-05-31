@@ -8,16 +8,17 @@ import (
 	"encoding/json"
 
 	"github.com/sboursault/gobank/bank/accounts"
-	"github.com/sboursault/gobank/events"
-	"github.com/sboursault/gobank/events/store"
+	es "github.com/sboursault/gobank/eventsourcing"
+
+	"github.com/sboursault/gobank/eventsourcing/store"
 )
 
 // types
 
-type Stream = events.Stream
-type Event = events.Event
-type Aggregate = events.Aggregate
-type EventStore = events.EventStore
+type Stream = es.Stream
+type Event = es.Event
+type Aggregate = es.Aggregate
+type EventStore = es.EventStore
 
 var eventStore EventStore = store.NewInMemory()
 
@@ -26,7 +27,7 @@ func openAccount(owner string) string {
 
 	event, _ := json.Marshal(accounts.NewOpenedEvent(owner))
 
-	eventStore.Write(events.New("account", accountId, "opened", string(event)))
+	eventStore.Write(es.NewEvent("account", accountId, "opened", string(event)))
 
 	return accountId
 }
@@ -34,7 +35,7 @@ func openAccount(owner string) string {
 func deposit(accountId string, amount float32) {
 
 	event, _ := json.Marshal(accounts.NewDepositedEvent(amount))
-	eventStore.Write(events.New("account", accountId, "deposited", string(event)))
+	eventStore.Write(es.NewEvent("account", accountId, "deposited", string(event)))
 }
 
 func withdraw(accountId string, amount float32) error {
@@ -46,7 +47,7 @@ func withdraw(accountId string, amount float32) error {
 	}
 
 	event, _ := json.Marshal(accounts.NewWithdrawnEvent(amount))
-	eventStore.Write(events.New("account", accountId, "withdrawn", string(event)))
+	eventStore.Write(es.NewEvent("account", accountId, "withdrawn", string(event)))
 
 	return nil
 }
@@ -60,11 +61,7 @@ func closeAccount(accountId string) error {
 	}
 
 	event, _ := json.Marshal(accounts.NewClosedEvent())
-	eventStore.Write(events.New("account", accountId, "closed", string(event)))
+	eventStore.Write(es.NewEvent("account", accountId, "closed", string(event)))
 
 	return nil
-}
-
-func PrintAccountInfo(id string) {
-
 }

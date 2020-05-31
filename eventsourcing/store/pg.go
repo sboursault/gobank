@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq" // pg driver, needs to be imported even if not explicitly used
-	"github.com/sboursault/gobank/events"
+	es "github.com/sboursault/gobank/eventsourcing"
 )
 
 const (
@@ -16,9 +16,9 @@ const (
 
 // types
 
-type Stream = events.Stream
-type Event = events.Event
-type Aggregate = events.Aggregate
+type Stream = es.Stream
+type Event = es.Event
+type Aggregate = es.Aggregate
 
 func connect() *sql.DB {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",

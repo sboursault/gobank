@@ -4,17 +4,17 @@ import (
 	marshaller "encoding/json"
 	"fmt"
 
-	"github.com/sboursault/gobank/events"
+	es "github.com/sboursault/gobank/eventsourcing"
 )
 
 const debug = true
 
 // types
 
-type Stream = events.Stream
-type Event = events.Event
-type Aggregate = events.Aggregate
-type EventStore = events.EventStore
+type Stream = es.Stream
+type Event = es.Event
+type Aggregate = es.Aggregate
+type EventStore = es.EventStore
 
 type account struct {
 	Owner   string
