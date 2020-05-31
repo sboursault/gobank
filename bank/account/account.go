@@ -11,6 +11,10 @@ const debug = true
 
 // types
 
+type Stream = events.Stream
+type Event = events.Event
+type Aggregate = events.Aggregate
+
 type Account struct {
 	Owner   string
 	Balance float32
@@ -34,9 +38,9 @@ type closedEvent struct {
 
 // functions
 
-func LeftFold(stream events.Stream) Account {
+func LeftFold(stream Stream) Account {
 
-	handlers := map[string]func(events.Aggregate, events.Event) events.Aggregate{
+	handlers := map[string]func(Aggregate, Event) Aggregate{
 		"opened":    onOpenedEvent,
 		"deposited": onDepositedEvent,
 		"withdrawn": onWithdrawnEvent,
@@ -65,7 +69,7 @@ func NewClosedEvent() closedEvent {
 
 // event handlers
 
-func onOpenedEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
+func onOpenedEvent(aggregate Aggregate, event Event) Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)
@@ -79,7 +83,7 @@ func onOpenedEvent(aggregate events.Aggregate, event events.Event) events.Aggreg
 	return account
 }
 
-func onDepositedEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
+func onDepositedEvent(aggregate Aggregate, event Event) Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)
@@ -93,7 +97,7 @@ func onDepositedEvent(aggregate events.Aggregate, event events.Event) events.Agg
 	return account
 }
 
-func onWithdrawnEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
+func onWithdrawnEvent(aggregate Aggregate, event Event) Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)
@@ -107,7 +111,7 @@ func onWithdrawnEvent(aggregate events.Aggregate, event events.Event) events.Agg
 	return account
 }
 
-func onClosedEvent(aggregate events.Aggregate, event events.Event) events.Aggregate {
+func onClosedEvent(aggregate Aggregate, event Event) Aggregate {
 	account := aggregate.(Account)
 
 	log("event", event)

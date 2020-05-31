@@ -12,14 +12,20 @@ import (
 	"github.com/sboursault/gobank/events/store"
 )
 
-var eventStore = store.NewInMemory()
+// types
+
+type Stream = events.Stream
+type Event = events.Event
+type Aggregate = events.Aggregate
+
+var eventStore events.EventStore = store.NewInMemory()
 
 func openAccount(owner string) string {
 	accountId := shortuuid.New()
 
 	event, _ := json.Marshal(account.NewOpenedEvent(owner))
 
-	eventStore.Write(events.New("account", accountId, "opened", string(event))) // un peu moche events.New, events.New ? masquer Event ?
+	eventStore.Write(events.New("account", accountId, "opened", string(event)))
 
 	// see https://golangbot.com/go-packages/
 
