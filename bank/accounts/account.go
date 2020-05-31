@@ -51,7 +51,7 @@ func LeftFold(stream Stream) account {
 }
 
 func Get(eventStore EventStore, id string) account {
-	stream := eventStore.Read(id)
+	stream := eventStore.ReadStream(id)
 	return LeftFold(stream)
 }
 

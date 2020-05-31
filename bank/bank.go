@@ -20,7 +20,7 @@ type Event = es.Event
 type Aggregate = es.Aggregate
 type EventStore = es.EventStore
 
-var eventStore EventStore = store.NewInMemory()
+var eventStore = store.NewInMemory()
 
 func openAccount(owner string) string {
 	accountId := shortuuid.New()

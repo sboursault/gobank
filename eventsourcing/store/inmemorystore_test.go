@@ -7,16 +7,16 @@ import (
 	es "github.com/sboursault/gobank/eventsourcing"
 )
 
-var store = NewInMemory()
+var store = inMemoryStore{}
 
 func Test_InMemory_storesEvents(t *testing.T) {
 
-	store.Clear()
+	store.clear()
 	store.Write(es.NewEvent("account", "account:001", "opened", `{"owner":"Snow John"}`))
 	store.Write(es.NewEvent("account", "account:001", "deposited", "{\"amount\":1000}"))
 	store.Write(es.NewEvent("account", "account:002", "opened", "{\"owner\":\"Arya Stark\"}"))
 
-	got := store.Read("account:001")
+	got := store.ReadStream("account:001")
 
 	want := es.NewStream(
 		es.NewEvent("account", "account:001", "opened", `{"owner":"Snow John"}`),

@@ -8,19 +8,28 @@ type inMemoryStore struct {
 	events []es.Event
 }
 
+// consctructor
+
+func NewInMemory() es.EventStore {
+	return &inMemoryStore{}
+}
+
+// public functions
+
 func (store *inMemoryStore) Write(event es.Event) {
 	store.events = append(store.events, event)
 }
 
-func (store *inMemoryStore) Read(streamId string) (stream es.Stream) {
+func (store *inMemoryStore) ReadStream(streamId string) (stream es.Stream) {
 	array := filter(
 		store.events,
 		func(event es.Event) bool { return event.StreamId == streamId })
 	return es.NewStream(array...)
-
 }
 
-func (store *inMemoryStore) Clear() {
+// private functions
+
+func (store *inMemoryStore) clear() {
 	store.events = nil
 }
 
@@ -33,12 +42,4 @@ func filter(elements []es.Event, f func(es.Event) bool) []es.Event {
 		}
 	}
 	return result
-}
-
-/*
-NewInMemory creates an InMemory structure, with a nil Event slice.
-It returns a pointer to the created structure.
-*/
-func NewInMemory() *inMemoryStore {
-	return &inMemoryStore{}
 }
