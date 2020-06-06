@@ -29,7 +29,7 @@ type pgStore struct {
 
 // consctructor
 
-func NewPg() es.EventStore {
+func PgConnection() es.EventStore {
 	return &pgStore{}
 }
 
@@ -37,6 +37,7 @@ func NewPg() es.EventStore {
 
 func (store *pgStore) Write(event es.Event) {
 	db := connect()
+	defer db.Close() // will be executed at the end of the surrounding function
 
 	var lastInsertId int
 	err := db.QueryRow(`
@@ -47,11 +48,12 @@ func (store *pgStore) Write(event es.Event) {
 	checkErr(err)
 	fmt.Println("last inserted id =", lastInsertId)
 
-	defer db.Close()
 }
 
 func (store *pgStore) ReadStream(streamId string) (stream Stream) {
 	db := connect()
+	defer db.Close() // will be executed at the end of the surrounding function
+
 	rows, err := db.Query("SELECT * FROM gobank.t_event")
 	checkErr(err)
 

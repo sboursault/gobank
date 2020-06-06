@@ -83,13 +83,3 @@ func Test_LeftFold(t *testing.T) {
 		t.Errorf("want:\n%+v\n, but got:\n%+v", want, got)
 	}
 }
-
-// TODO
-// how to switch memory store
-//   soit c'est account qui masque la base
-//   soit c'est un objet banque/service qui permet de récupérer un compte, faire un dépot
-//      -> essayer cette option, dans le dernier test, ne plus faire apparaître l'event store
-// verif balance positive
-// blagues : John Snow ouvre un compte en banque, verif balance un peu bête car empeche les agio
-// brancher sur base PG
-// brancher sur ligne de commande (après BD, ainsi il y aura un stockage persistant)

@@ -2,11 +2,28 @@ package bank
 
 import (
 	"errors"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/sboursault/gobank/bank/accounts"
+	"github.com/sboursault/gobank/eventsourcing/store"
 )
+
+/*
+TestMain runs in the main goroutine and can do whatever setup and teardown is necessary around a call to m.Run.
+It should then call os.Exit with the result of m.Run.
+*/
+func TestMain(m *testing.M) {
+
+	// setup
+	eventStore = store.NewInMemory()
+	// run test
+	code := m.Run()
+	// teardown
+	// ...
+	os.Exit(code)
+}
 
 func Test_openAccount(t *testing.T) {
 
