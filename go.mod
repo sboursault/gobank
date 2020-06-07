@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/google/go-cmp v0.4.0
-	github.com/google/uuid v1.1.1 // indirect
 	github.com/lib/pq v1.5.2
-	github.com/lithammer/shortuuid v3.0.0+incompatible
+	github.com/urfave/cli v1.22.4
+	github.com/urfave/cli/v2 v2.2.0
 )

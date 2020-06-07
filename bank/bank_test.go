@@ -25,9 +25,9 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func Test_openAccount(t *testing.T) {
+func Test_OpenAccount(t *testing.T) {
 
-	id := openAccount("John Snow")
+	id := OpenAccount("John Snow")
 
 	got := accounts.Get(eventStore, id)
 
@@ -39,13 +39,13 @@ func Test_openAccount(t *testing.T) {
 	}
 }
 
-func Test_deposit(t *testing.T) {
+func Test_Deposit(t *testing.T) {
 
-	accountId := openAccount("John Snow")
+	accountNumber := OpenAccount("John Snow")
 
-	deposit(accountId, 200)
+	Deposit(accountNumber, 200)
 
-	got := accounts.Get(eventStore, accountId)
+	got := accounts.Get(eventStore, accountNumber)
 
 	want := accounts.New()
 	want.Owner = "John Snow"
@@ -58,12 +58,12 @@ func Test_deposit(t *testing.T) {
 
 func Test_withraw(t *testing.T) {
 
-	accountId := openAccount("John Snow")
+	accountNumber := OpenAccount("John Snow")
 
-	deposit(accountId, 200)
-	withdraw(accountId, 50)
+	Deposit(accountNumber, 200)
+	Withdraw(accountNumber, 50)
 
-	got := accounts.Get(eventStore, accountId)
+	got := accounts.Get(eventStore, accountNumber)
 
 	want := accounts.New()
 	want.Owner = "John Snow"
@@ -76,9 +76,9 @@ func Test_withraw(t *testing.T) {
 
 func Test_withraw_refused(t *testing.T) {
 
-	accountId := openAccount("John Snow")
+	accountNumber := OpenAccount("John Snow")
 
-	gotErr := withdraw(accountId, 50)
+	gotErr := Withdraw(accountNumber, 50)
 
 	wantedErr := errors.New("Not enough money to withdraw 50 (account balance: 0)")
 
@@ -87,7 +87,7 @@ func Test_withraw_refused(t *testing.T) {
 		return
 	}
 
-	got := accounts.Get(eventStore, accountId)
+	got := accounts.Get(eventStore, accountNumber)
 
 	want := accounts.New()
 	want.Owner = "John Snow"
@@ -100,11 +100,11 @@ func Test_withraw_refused(t *testing.T) {
 
 func Test_close(t *testing.T) {
 
-	accountId := openAccount("John Snow")
+	accountNumber := OpenAccount("John Snow")
 
-	closeAccount(accountId)
+	CloseAccount(accountNumber)
 
-	got := accounts.Get(eventStore, accountId)
+	got := accounts.Get(eventStore, accountNumber)
 
 	want := accounts.New()
 	want.Owner = "John Snow"
@@ -118,10 +118,10 @@ func Test_close(t *testing.T) {
 
 func Test_close_refused(t *testing.T) {
 
-	accountId := openAccount("John Snow")
-	deposit(accountId, 200)
+	accountNumber := OpenAccount("John Snow")
+	Deposit(accountNumber, 200)
 
-	gotErr := closeAccount(accountId)
+	gotErr := CloseAccount(accountNumber)
 
 	wantedErr := errors.New("Can't close account (account balance: 200)")
 
@@ -130,7 +130,7 @@ func Test_close_refused(t *testing.T) {
 		return
 	}
 
-	got := accounts.Get(eventStore, accountId)
+	got := accounts.Get(eventStore, accountNumber)
 
 	want := accounts.New()
 	want.Owner = "John Snow"

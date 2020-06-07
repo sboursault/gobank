@@ -2,8 +2,8 @@ package bank
 
 import (
 	"fmt"
-
-	"github.com/lithammer/shortuuid"
+	"math/rand"
+	"time"
 
 	"encoding/json"
 
@@ -22,46 +22,62 @@ type EventStore = es.EventStore
 
 var eventStore = store.PgConnection()
 
-func openAccount(owner string) string {
-	accountId := shortuuid.New()
+// public functions
+
+/*
+init function is called at startup
+*/
+func init() {
+	rand.Seed(time.Now().UnixNano()) // initialize rand module
+}
+
+func OpenAccount(owner string) string {
+	accountNumber := generateAccountNumber()
 
 	event, _ := json.Marshal(accounts.NewOpenedEvent(owner))
 
-	eventStore.Write(es.NewEvent("account", accountId, "opened", string(event)))
+	eventStore.Write(es.NewEvent("account", accountNumber, "opened", string(event)))
 
-	return accountId
+	return accountNumber
 }
 
-func deposit(accountId string, amount float32) {
+func Deposit(accountNumber string, amount float32) {
 
 	event, _ := json.Marshal(accounts.NewDepositedEvent(amount))
-	eventStore.Write(es.NewEvent("account", accountId, "deposited", string(event)))
+	eventStore.Write(es.NewEvent("account", accountNumber, "deposited", string(event)))
 }
 
-func withdraw(accountId string, amount float32) error {
+func Withdraw(accountNumber string, amount float32) error {
 
-	aggregate := accounts.Get(eventStore, accountId)
+	aggregate := accounts.Get(eventStore, accountNumber)
 
 	if amount > aggregate.Balance {
 		return fmt.Errorf("Not enough money to withdraw %g (account balance: %g)", amount, aggregate.Balance)
 	}
 
 	event, _ := json.Marshal(accounts.NewWithdrawnEvent(amount))
-	eventStore.Write(es.NewEvent("account", accountId, "withdrawn", string(event)))
+	eventStore.Write(es.NewEvent("account", accountNumber, "withdrawn", string(event)))
 
 	return nil
 }
 
-func closeAccount(accountId string) error {
+func CloseAccount(accountNumber string) error {
 
-	aggregate := accounts.Get(eventStore, accountId)
+	aggregate := accounts.Get(eventStore, accountNumber)
 
 	if aggregate.Balance != 0 {
 		return fmt.Errorf("Can't close account (account balance: %g)", aggregate.Balance)
 	}
 
 	event, _ := json.Marshal(accounts.NewClosedEvent())
-	eventStore.Write(es.NewEvent("account", accountId, "closed", string(event)))
+	eventStore.Write(es.NewEvent("account", accountNumber, "closed", string(event)))
 
 	return nil
+}
+
+// private functions
+
+func generateAccountNumber() string {
+	random_number := rand.Int63n(1e11)         // generate number
+	return fmt.Sprintf("%011d", random_number) // left pad with 0
 }

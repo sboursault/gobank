@@ -1,35 +1,64 @@
 package main // executable commands must always use package main.
 
 import (
-	"flag"
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/urfave/cli/v2"
+
+	"github.com/sboursault/gobank/bank"
 )
 
 func main() {
+	app := &cli.App{
+		Name:  "gobank",
+		Usage: "A simplistic bank account service based on event sourcing",
+		Commands: []*cli.Command{
+			{
+				Name:      "open-account",
+				Aliases:   []string{"oa"},
+				Usage:     "Opens a bank account",
+				ArgsUsage: "OWNER",
+				Action: func(c *cli.Context) error {
 
-	createCommand := flag.NewFlagSet("create", flag.ExitOnError)
+					owner := c.Args().Get(0)
 
-	ownerPtr := createCommand.String("owner", "Darth Vader", "Account owner. (Required)")
+					if owner == "" {
+						cli.ShowCommandHelpAndExit(c, "open-account", 1)
+					}
 
-	// Verify that a subcommand has been provided
-	// os.Arg[0] is the main command
-	// os.Arg[1] will be the subcommand
-	if len(os.Args) < 2 {
-		fmt.Println("a subcommand is required")
-		os.Exit(1)
+					accountNo := bank.OpenAccount(owner)
+
+					fmt.Printf("new account number: %+v\n", accountNo)
+					return nil
+				},
+			},
+			{
+				Name:    "deposit",
+				Aliases: []string{"d"},
+				Usage:   "Make a deposite",
+				Action: func(c *cli.Context) error {
+
+					accountNumber := c.Args().Get(0)
+					amount := c.Args().Get(1)
+
+					if accountNumber == "" || amount == "" {
+						cli.ShowCommandHelpAndExit(c, "deposit", 1)
+					}
+
+					accountNo := bank.Deposit(accountNumber)
+
+					fmt.Printf("new account number: %+v\n", accountNo)
+
+					return nil
+				},
+			},
+		},
 	}
 
-	switch os.Args[1] {
-
-	case "create":
-		createCommand.Parse(os.Args[2:])
-		fmt.Println(" create account for :", *ownerPtr)
-		fmt.Println("  tail:", createCommand.Args())
-
-	default:
-		fmt.Println("expected 'foo' or 'bar' subcommands")
-		os.Exit(1)
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
 	}
-
 }

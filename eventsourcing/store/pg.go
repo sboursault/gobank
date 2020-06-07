@@ -16,6 +16,8 @@ const (
 	DB_USER     = "postgres"
 	DB_PASSWORD = "changeme"
 	DB_NAME     = "postgres"
+
+	debug = false
 )
 
 // types
@@ -46,7 +48,7 @@ func (store *pgStore) Write(event es.Event) {
 		returning id;
 		`, event.AggregateType, event.StreamId, event.EventType, event.Payload).Scan(&lastInsertId)
 	checkErr(err)
-	fmt.Println("last inserted id =", lastInsertId)
+	log("last inserted id", lastInsertId)
 
 }
 
@@ -86,5 +88,11 @@ func connect() *sql.DB {
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func log(label string, something interface{}) {
+	if debug {
+		fmt.Printf(label+": %+v\n", something)
 	}
 }
