@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/urfave/cli/v2"
 
@@ -22,34 +23,54 @@ func main() {
 				ArgsUsage: "OWNER",
 				Action: func(c *cli.Context) error {
 
-					owner := c.Args().Get(0)
-
-					if owner == "" {
+					if c.Args().Len() != 1 {
 						cli.ShowCommandHelpAndExit(c, "open-account", 1)
 					}
 
+					owner := c.Args().Get(0)
 					accountNo := bank.OpenAccount(owner)
 
 					fmt.Printf("new account number: %+v\n", accountNo)
+
 					return nil
-				},
-			},
+				}},
 			{
-				Name:    "deposit",
-				Aliases: []string{"d"},
-				Usage:   "Make a deposite",
+				Name:      "deposit",
+				Aliases:   []string{"d"},
+				Usage:     "Make a deposite",
+				ArgsUsage: "ACCOUNT-NUMBER AMOUNT",
 				Action: func(c *cli.Context) error {
 
-					accountNumber := c.Args().Get(0)
-					amount := c.Args().Get(1)
-
-					if accountNumber == "" || amount == "" {
+					if c.Args().Len() != 2 {
 						cli.ShowCommandHelpAndExit(c, "deposit", 1)
 					}
 
-					accountNo := bank.Deposit(accountNumber)
+					accountNumber := c.Args().Get(0)
+					amount := strToFloat32(c.Args().Get(1))
 
-					fmt.Printf("new account number: %+v\n", accountNo)
+					bank.Deposit(accountNumber, amount)
+
+					return nil
+				}},
+			{
+				Name:      "withdraw",
+				Aliases:   []string{"w"},
+				Usage:     "Make a withdrawal",
+				ArgsUsage: "ACCOUNT-NUMBER AMOUNT",
+				Action: func(c *cli.Context) error {
+
+					if c.Args().Len() != 2 {
+						cli.ShowCommandHelpAndExit(c, "withdraw", 1)
+					}
+
+					accountNumber := c.Args().Get(0)
+					amount := strToFloat32(c.Args().Get(1))
+
+					err := bank.Withdraw(accountNumber, amount)
+
+					if err != nil {
+						fmt.Println(err)
+					}
 
 					return nil
 				},
@@ -61,4 +82,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func strToFloat32(input string) float32 {
+	f, err := strconv.ParseFloat(input, 32)
+	checkErr(err)
+	return float32(f)
 }

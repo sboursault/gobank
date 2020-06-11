@@ -7,7 +7,7 @@ import (
 	es "github.com/sboursault/gobank/eventsourcing"
 )
 
-const debug = true
+const debug = false
 
 // types
 

@@ -56,7 +56,10 @@ func (store *pgStore) ReadStream(streamId string) (stream Stream) {
 	db := connect()
 	defer db.Close() // will be executed at the end of the surrounding function
 
-	rows, err := db.Query("SELECT * FROM gobank.t_event")
+	rows, err := db.Query(`
+		SELECT aggregate_type, stream_id, event_type, payload
+		FROM gobank.t_event
+		WHERE stream_id = $1`, streamId)
 	checkErr(err)
 
 	var events []Event

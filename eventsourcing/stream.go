@@ -17,6 +17,9 @@ func (stream *Stream) LeftFold(
 
 	for _, event := range stream.Events {
 		f := handlers[event.EventType]
+		if f == nil {
+			panic("no handler for " + event.EventType)
+		}
 		aggregate = f(aggregate, event)
 	}
 	return aggregate
