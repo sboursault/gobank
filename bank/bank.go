@@ -75,6 +75,20 @@ func CloseAccount(accountNumber string) error {
 	return nil
 }
 
+func GetAccountInfo(accountNumber string) string {
+
+	aggregate := accounts.Get(eventStore, accountNumber)
+
+	info := "Account " + accountNumber + "\n"
+	info += "Balance: " + fmt.Sprintf("%f", aggregate.Balance) + "\n"
+
+	if aggregate.Closed {
+		info += "Closed\n"
+	}
+
+	return info
+}
+
 // private functions
 
 func generateAccountNumber() string {

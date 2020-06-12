@@ -17,6 +17,24 @@ func main() {
 		Usage: "A simplistic bank account service based on event sourcing",
 		Commands: []*cli.Command{
 			{
+				Name:      "account-info",
+				Aliases:   []string{"ai"},
+				Usage:     "Get account information",
+				ArgsUsage: "ACCOUNT_NUMBER",
+				Action: func(c *cli.Context) error {
+
+					if c.Args().Len() != 1 {
+						cli.ShowCommandHelpAndExit(c, "account-info", 1)
+					}
+
+					accountNumber := c.Args().Get(0)
+					info := bank.GetAccountInfo(accountNumber)
+
+					fmt.Print(info)
+
+					return nil
+				}},
+			{
 				Name:      "open-account",
 				Aliases:   []string{"oa"},
 				Usage:     "Opens a bank account",
@@ -75,6 +93,23 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:      "close-account",
+				Aliases:   []string{"ca"},
+				Usage:     "Close an account",
+				ArgsUsage: "ACCOUNT-NUMBER",
+				Action: func(c *cli.Context) error {
+
+					if c.Args().Len() != 1 {
+						cli.ShowCommandHelpAndExit(c, "close-account", 1)
+					}
+
+					accountNumber := c.Args().Get(0)
+
+					bank.CloseAccount(accountNumber)
+
+					return nil
+				}},
 		},
 	}
 
