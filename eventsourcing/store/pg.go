@@ -8,7 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq" // pg driver, needs to be imported even if not explicitly used
+	pg "github.com/lib/pq" // pg driver, needs to be imported even if not explicitly used
 	es "github.com/sboursault/gobank/eventsourcing"
 )
 
@@ -43,10 +43,10 @@ func (store *pgStore) Write(event es.Event) {
 
 	var lastInsertId int
 	err := db.QueryRow(`
-		INSERT INTO gobank.t_event(aggregate_type, stream_id, event_type, payload)
-		VALUES($1, $2, $3, $4)
+		INSERT INTO gobank.t_event(aggregate_type, stream_id, date, event_type, payload)
+		VALUES($1, $2, $3, $4, $5)
 		returning id;
-		`, event.AggregateType, event.StreamId, event.EventType, event.Payload).Scan(&lastInsertId)
+		`, event.AggregateType, event.StreamId, event.Date, event.EventType, event.Payload).Scan(&lastInsertId)
 	checkErr(err)
 	log("last inserted id", lastInsertId)
 
@@ -57,7 +57,7 @@ func (store *pgStore) ReadStream(streamId string) (stream Stream) {
 	defer db.Close() // will be executed at the end of the surrounding function
 
 	rows, err := db.Query(`
-		SELECT aggregate_type, stream_id, event_type, payload
+		SELECT aggregate_type, stream_id, date, event_type, payload
 		FROM gobank.t_event
 		WHERE stream_id = $1`, streamId)
 	checkErr(err)
@@ -67,12 +67,18 @@ func (store *pgStore) ReadStream(streamId string) (stream Stream) {
 	for rows.Next() {
 		var aggregateType string
 		var streamId string
+		var date pg.NullTime
 		var eventType string
 		var payload string
-		err = rows.Scan(&aggregateType, &streamId, &eventType, &payload)
+		err = rows.Scan(&aggregateType, &streamId, &date, &eventType, &payload)
 		checkErr(err)
 
-		events = append(events, es.NewEvent(aggregateType, streamId, eventType, payload))
+		events = append(events, es.Event{
+			AggregateType: aggregateType,
+			StreamId:      streamId,
+			Date:          date.Time,
+			EventType:     eventType,
+			Payload:       payload})
 
 	}
 	return es.NewStream(events...)

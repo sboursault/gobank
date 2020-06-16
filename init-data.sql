@@ -7,6 +7,7 @@ CREATE TABLE gobank.t_event
     id             SERIAL PRIMARY KEY,
 	aggregate_type VARCHAR NOT NULL,
 	stream_id      VARCHAR NOT NULL,
+	date           TIMESTAMP NOT NULL, 
 	event_type     VARCHAR NOT NULL,
 	payload        VARCHAR NOT NULL
 )

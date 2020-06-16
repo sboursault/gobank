@@ -3,6 +3,7 @@ package accounts
 import (
 	marshaller "encoding/json"
 	"fmt"
+	"time"
 
 	es "github.com/sboursault/gobank/eventsourcing"
 )
@@ -20,6 +21,12 @@ type account struct {
 	Owner   string
 	Balance float32
 	Closed  bool
+	Entries []entry
+}
+
+type entry struct {
+	Date   time.Time
+	Amount float32
 }
 
 type openedEvent struct {
@@ -101,6 +108,8 @@ func onDepositedEvent(aggregate Aggregate, event Event) Aggregate {
 	payload := unmarshalDepositedEvent(event.Payload)
 
 	account.Balance += payload.Amount
+
+	//account.Entries = append(account.Entries, entry{Date: time.Now(), Amount: event.Date})
 
 	log("account", account)
 
