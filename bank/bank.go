@@ -80,10 +80,25 @@ func GetAccountInfo(accountNumber string) string {
 	aggregate := accounts.Get(eventStore, accountNumber)
 
 	info := "Account " + accountNumber + "\n"
-	info += "Balance: " + fmt.Sprintf("%f", aggregate.Balance) + "\n"
+	info += fmt.Sprintf("Balance: %f \n", aggregate.Balance)
 
 	if aggregate.Closed {
 		info += "Closed\n"
+	}
+
+	entryCount := len(aggregate.Entries)
+
+	if entryCount > 0 {
+		firstEntryToDisplay := entryCount - 5
+		if firstEntryToDisplay < 0 {
+			firstEntryToDisplay = 0
+		}
+		info += "Entries:\n"
+		for _, entry := range aggregate.Entries[firstEntryToDisplay:] {
+
+			info += fmt.Sprintf("%s: %10.2f \n", entry.Date.Format(time.Stamp), entry.Amount)
+
+		}
 	}
 
 	return info

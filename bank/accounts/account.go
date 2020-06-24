@@ -109,7 +109,7 @@ func onDepositedEvent(aggregate Aggregate, event Event) Aggregate {
 
 	account.Balance += payload.Amount
 
-	//account.Entries = append(account.Entries, entry{Date: time.Now(), Amount: event.Date})
+	account.Entries = append(account.Entries, entry{Date: event.Date, Amount: payload.Amount})
 
 	log("account", account)
 
@@ -124,6 +124,8 @@ func onWithdrawnEvent(aggregate Aggregate, event Event) Aggregate {
 	payload := unmarshalWithdrawnEvent(event.Payload)
 
 	account.Balance -= payload.Amount
+
+	account.Entries = append(account.Entries, entry{Date: event.Date, Amount: -payload.Amount})
 
 	log("account", account)
 
